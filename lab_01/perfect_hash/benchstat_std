@@ -1,0 +1,35 @@
+goos: linux
+goarch: amd64
+pkg: vexrina/siaod_itmo/lab_01/perfect_hash
+cpu: AMD Ryzen 5 3600 6-Core Processor              
+                                 │     benchs      │
+                                 │     sec/op      │
+NewPerfectHash-12                    508.7m ± 106%
+LookupExisting-12                    14.08n ±   9%
+LookupNonExisting-12                 19.53n ±   3%
+GetValueByKey-12                     14.39n ±   4%
+PerfectHash_GetByKey_Together-12   0.03095n ±   4%
+PutNewKeyValue-12                     1.316 ± 124%
+geomean                              2.084µ
+
+                                 │     benchs     │
+                                 │      B/op      │
+NewPerfectHash-12                  2.919Gi ± 0%
+LookupExisting-12                    0.000 ± 0%
+LookupNonExisting-12                 0.000 ± 0%
+GetValueByKey-12                     0.000 ± 0%
+PerfectHash_GetByKey_Together-12     0.000 ± 0%
+PutNewKeyValue-12                  5.514Gi ± 0%
+geomean                                         ¹
+¹ summaries must be >0 to compute geomean
+
+                                 │    benchs     │
+                                 │   allocs/op   │
+NewPerfectHash-12                  109.5k ± 0%
+LookupExisting-12                   0.000 ± 0%
+LookupNonExisting-12                0.000 ± 0%
+GetValueByKey-12                    0.000 ± 0%
+PerfectHash_GetByKey_Together-12    0.000 ± 0%
+PutNewKeyValue-12                  75.91k ± 0%
+geomean                                        ¹
+¹ summaries must be >0 to compute geomean

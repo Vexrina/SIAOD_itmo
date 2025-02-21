@@ -38,7 +38,7 @@ func TestExtendableHash_CreateInsertGetStat(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			eh := NewExtendableHash(tc.startDepth, tc.maxSize)
+			eh := NewExtendableHash(tc.startDepth, tc.maxSize, false)
 			for idx := range tc.keys {
 				eh.Insert(tc.keys[idx], tc.values[idx])
 			}
@@ -51,7 +51,7 @@ func TestExtendableHash_CreateInsertGetStat(t *testing.T) {
 }
 
 func TestExtendableHash_GetValues(t *testing.T) {
-	eh := NewExtendableHash(3, 3)
+	eh := NewExtendableHash(3, 3, false)
 	eh.Insert("apple", "red")
 	eh.Insert("banana", "yellow")
 	eh.Insert("grape", "purple")
@@ -101,19 +101,21 @@ func generateValues(n int) []string {
 }
 
 var (
-	keys   = generateKeys(1000)
-	values = generateValues(1000)
+	keys        = generateKeys(10e6) // 10^6 = 1_000_000
+	values      = generateValues(10e6)
+	globalDepth = 20
+	bucketSize  = 256
 )
 
 func BenchmarkNewExtendableHash(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		NewExtendableHash(7, 128)
+		NewExtendableHash(globalDepth, bucketSize, false)
 	}
 }
 
 func BenchmarkExtendableHash_Insert(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		eh := NewExtendableHash(7, 128)
+		eh := NewExtendableHash(globalDepth, bucketSize, false)
 		for jndx := range keys {
 			eh.Insert(keys[jndx], values[jndx])
 		}
@@ -121,7 +123,7 @@ func BenchmarkExtendableHash_Insert(b *testing.B) {
 }
 
 func BenchmarkExtendableHash_GetByKey_ExistingKey(b *testing.B) {
-	eh := NewExtendableHash(7, 128)
+	eh := NewExtendableHash(globalDepth, bucketSize, false)
 	for jndx := range keys {
 		eh.Insert(keys[jndx], values[jndx])
 	}
@@ -133,13 +135,55 @@ func BenchmarkExtendableHash_GetByKey_ExistingKey(b *testing.B) {
 }
 
 func BenchmarkExtendableHash_GetByKey_NotExistingKey(b *testing.B) {
-	eh := NewExtendableHash(7, 128)
+	eh := NewExtendableHash(globalDepth, bucketSize, false)
 	for jndx := range keys {
 		eh.Insert(keys[jndx], values[jndx])
 	}
-	key := "abcd"
+	key := "key-777"
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		eh.GetByKey(key)
+	}
+}
+
+func BenchmarkExtendableHash_GetByKey_Together(b *testing.B) {
+	eh := NewExtendableHash(globalDepth, bucketSize, false)
+	for jndx := range keys {
+		eh.Insert(keys[jndx], values[jndx])
+	}
+	b.ResetTimer()
+	for _, key := range keys {
+		eh.GetByKey(key)
+		eh.GetByKey("-" + key)
+	}
+}
+
+func BenchmarkExtendableHash_InsertFileALL(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		eh := NewExtendableHash(globalDepth, bucketSize, true)
+		b.ResetTimer()
+		for jndx := range keys {
+			eh.Insert(keys[jndx], values[jndx])
+		}
+	}
+}
+
+func BenchmarkExtendableHash_InsertFileOne(b *testing.B) {
+	eh := NewExtendableHash(globalDepth, bucketSize, true)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		eh.Insert(keys[50], values[50])
+	}
+}
+
+func BenchmarkExtendableHash_GetByKey_TogetherFILE(b *testing.B) {
+	eh := NewExtendableHash(globalDepth, bucketSize, true)
+	for jndx := range keys {
+		eh.Insert(keys[jndx], values[jndx])
+	}
+	b.ResetTimer()
+	for _, key := range keys {
+		eh.GetByKey(key)
+		eh.GetByKey("-" + key)
 	}
 }

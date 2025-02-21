@@ -31,9 +31,23 @@ func hashFunc(key string, size int) int {
 	return int(h.Sum32()) % size
 }
 
+
+func cleanCollision(size, outerKeyIdx int, keys []string, values []any)([]string, []*utils.KeyValue){
+	newTable := make([]string, size)
+	newKeyValues := make([]*utils.KeyValue, size)
+	for innerKeyIdx, innerKey := range keys[:outerKeyIdx+1] {
+		idx := hashFunc(innerKey, size)
+		if newTable[idx] != "" { // в теории, не достижимо
+			newTable, newKeyValues = cleanCollision(size*2, innerKeyIdx, keys, values)
+		}
+		newTable[idx] = innerKey
+		newKeyValues[idx] = utils.NewKeyValue(innerKey, values[innerKeyIdx])
+	}
+	return newTable, newKeyValues
+}
 // NewPerfectHash создает хеш-таблицу без коллизий для фиксированного набора ключей
 func NewPerfectHash(keys []string, values []any) *PerfectHash {
-	size := len(keys) * len(keys)
+	size := len(keys) * 2 // Начальный размер таблицы
 	table := make([]string, size)
 	keyValues := make([]*utils.KeyValue, size)
 
@@ -42,19 +56,9 @@ func NewPerfectHash(keys []string, values []any) *PerfectHash {
 		wasCollision := false
 		// коллизия
 		for table[index] != "" {
-			// увеличиваем размер
-			size++
-			// рекреейтим таблицу ключей и ключ-значения
-			table = make([]string, size)
-			keyValues = make([]*utils.KeyValue, size)
-			for innerKeyIdx, innerKey := range keys[:outerKeyIdx+1] {
-				idx := hashFunc(innerKey, size)
-				if table[idx] != "" { // в теории, не достижимо
-					panic("got collision while trying destroy collision")
-				}
-				table[idx] = innerKey
-				keyValues[idx] = utils.NewKeyValue(innerKey, values[innerKeyIdx])
-			}
+			// увеличиваем размер таблицы вдвое
+			size *= 2
+			table, keyValues= cleanCollision(size, outerKeyIdx, keys, values)
 			wasCollision = true
 		}
 
@@ -66,7 +70,6 @@ func NewPerfectHash(keys []string, values []any) *PerfectHash {
 
 	return &PerfectHash{table: table, size: size, keyValues: keyValues}
 }
-
 // findIdx находит необходимый индекс по ключу
 func (ph *PerfectHash) findIdx(key string) (bool, int) {
 	index := hashFunc(key, ph.size)
@@ -87,7 +90,7 @@ func (ph *PerfectHash) GetValueByKey(key string) (any, error) {
 	)
 
 	if exist, idx = ph.findIdx(key); !exist {
-		return nil, fmt.Errorf("Don't have a key \"%s\" in hashTable", key)
+		return nil, fmt.Errorf("don't have a key \"%s\" in hashTable", key)
 	}
 
 	return ph.keyValues[idx].Value, nil

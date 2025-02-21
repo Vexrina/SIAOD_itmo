@@ -2,15 +2,16 @@ package perfect_hash
 
 import (
 	"fmt"
-	"slices"
+	// "slices"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	// "github.com/stretchr/testify/assert"
+	// "github.com/stretchr/testify/require"
 
-	"vexrina/siaod_itmo/lab_01/utils"
+	// "vexrina/siaod_itmo/lab_01/utils"
 )
 
+/*
 func hashFuncBruteforce(size, maxCounter int, ignoring []string) {
 	seen := make(map[int]string)
 	for i := 0; i < 1000000; i++ {
@@ -249,6 +250,7 @@ func TestPerfectHash_PutNewKeyValue(t *testing.T) {
 		assert.NotEqual(t, "", newPh.table[idx])
 	}
 }
+*/
 
 func generateKeys(n int) []string {
 	keys := make([]string, n)
@@ -267,17 +269,18 @@ func generateValues(n int) []any {
 }
 
 var (
-	keys   = generateKeys(1000)
-	values = generateValues(1000)
+	size   = int(6*10_000)
+	keys   = generateKeys(size) // 20k
+	values = generateValues(size)
 	ph     = NewPerfectHash(keys, values)
 )
 
 // go test -benchmem -run=^$ -bench ^BenchmarkHashFunc
-func BenchmarkHashFunc(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		hashFunc("benchmark_key", 1024)
-	}
-}
+// func BenchmarkHashFunc(b *testing.B) {
+// 	for i := 0; i < b.N; i++ {
+// 		hashFunc("benchmark_key", 10)
+// 	}
+// }
 
 func BenchmarkNewPerfectHash(b *testing.B) {
 	for i := 0; i < b.N; i++ {
@@ -306,6 +309,14 @@ func BenchmarkGetValueByKey(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _ = ph.GetValueByKey(key)
+	}
+}
+
+func BenchmarkPerfectHash_GetByKey_Together(b *testing.B) {
+	b.ResetTimer()
+	for _, key := range keys {
+		_, _ = ph.GetValueByKey(key)
+		_, _ = ph.GetValueByKey("-" + key)
 	}
 }
 

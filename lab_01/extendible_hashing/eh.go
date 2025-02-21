@@ -1,6 +1,7 @@
 package extendible_hashing
 
 import (
+	"fmt"
 	"hash/fnv"
 )
 
@@ -8,11 +9,13 @@ type Bucket struct {
 	data       map[string]any
 	localDepth int
 	maxSize    int
+	fileName   string
 }
 
 type ExtendableHash struct {
 	globalDepth int
 	buckets     []*Bucket
+	fileSystem  bool
 }
 
 func hashFunc(key string) uint32 {
@@ -21,7 +24,19 @@ func hashFunc(key string) uint32 {
 	return h.Sum32()
 }
 
-func newBucket(depth, maxSize int) *Bucket {
+func newBucket(depth, maxSize, bucketNumber int, fileSystem bool) *Bucket {
+	if fileSystem {
+		fileName := fmt.Sprintf("./buckets/bucket_%d.dat", bucketNumber)
+		b := &Bucket{
+			localDepth: depth,
+			maxSize:    maxSize,
+			fileName:   fileName,
+		}
+		if b.writeToFile("", "") != nil {
+			panic("cannot write empty values to file")
+		}
+		return b
+	}
 	return &Bucket{
 		data:       make(map[string]any),
 		localDepth: depth,
@@ -29,17 +44,18 @@ func newBucket(depth, maxSize int) *Bucket {
 	}
 }
 
-func NewExtendableHash(globalDepth, bucketSize int) *ExtendableHash {
+func NewExtendableHash(globalDepth, bucketSize int, fileSystem bool) *ExtendableHash {
 	if globalDepth <= 0 {
 		panic("globalDepth must be greater than zero")
 	}
 	buckets := make([]*Bucket, 1<<globalDepth)
 	for i := range buckets {
-		buckets[i] = newBucket(1, bucketSize)
+		buckets[i] = newBucket(1, bucketSize, i, fileSystem)
 	}
 	return &ExtendableHash{
 		globalDepth: globalDepth,
 		buckets:     buckets,
+		fileSystem:  fileSystem,
 	}
 }
 
@@ -53,45 +69,32 @@ func (eh *ExtendableHash) GetNumDirs() int {
 
 // Вставка элемента
 func (eh *ExtendableHash) Insert(key, value string) {
-	index := eh.getIndex(key)
-	bucket := eh.buckets[index]
-
-	if len(bucket.data) < bucket.maxSize {
-		bucket.data[key] = value
+	if eh.fileSystem {
+		eh.insertFile(key, value)
 		return
 	}
-
-	// Если ведро заполнено, происходит разделение
-	eh.splitBucket(index)
-	eh.Insert(key, value)
+	eh.insertNotFileSystem(key, value)
 }
 
-// делим бакет на два
-func (eh *ExtendableHash) splitBucket(index int) {
-	bucket := eh.buckets[index]
-	bucket.localDepth++
+// Индексация ключа в директории
+func (eh *ExtendableHash) getIndex(key string) int {
+	mask := (1 << eh.globalDepth) - 1
+	return int(hashFunc(key)) & mask
+}
 
-	// если хотим поделить бакет на количество, превышающее кол-во директорий
-	if bucket.localDepth > eh.globalDepth {
-		eh.doubleDirectory()
+// Поиск элемента
+func (eh *ExtendableHash) GetByKey(key string) (any, bool) {
+	if eh.fileSystem {
+		return eh.getByKeyFile(key)
 	}
+	return eh.getByKeyNotFile(key)
+}
 
-	newBucket := newBucket(bucket.localDepth, bucket.maxSize)
-
-	// перераскидываем ключики
-	for k, v := range bucket.data {
-		if eh.getIndex(k) != index {
-			newBucket.data[k] = v
-			delete(bucket.data, k)
-		}
+func (eh *ExtendableHash) GetAllKeys() []string {
+	if eh.fileSystem {
+		return eh.getAllKeysFileSystem()
 	}
-
-	// апдейтим ссылки на бакеты
-	for i := 0; i < len(eh.buckets); i++ {
-		if eh.buckets[i] == bucket && (i>>uint(bucket.localDepth-1))&1 == 1 {
-			eh.buckets[i] = newBucket
-		}
-	}
+	return eh.getAllKeysNotFile()
 }
 
 // даблит директорию
@@ -109,28 +112,4 @@ func (eh *ExtendableHash) doubleDirectory() {
 		newBuckets[2*i+1] = eh.buckets[i]
 	}
 	eh.buckets = newBuckets
-}
-
-// Индексация ключа в директории
-func (eh *ExtendableHash) getIndex(key string) int {
-	mask := (1 << eh.globalDepth) - 1
-	return int(hashFunc(key)) & mask
-}
-
-// Поиск элемента
-func (eh *ExtendableHash) GetByKey(key string) (any, bool) {
-	index := eh.getIndex(key)
-	bucket := eh.buckets[index]
-	val, exists := bucket.data[key]
-	return val, exists
-}
-
-func (eh *ExtendableHash) GetAllKeys() []string {
-	keys := make([]string, 0, len(eh.buckets)*eh.buckets[0].maxSize)
-	for _, bucket := range eh.buckets {
-		for k := range bucket.data {
-			keys = append(keys, k)
-		}
-	}
-	return keys
 }
