@@ -1,0 +1,32 @@
+goos: linux
+goarch: amd64
+pkg: vexrina/siaod_itmo/lab_01/extendible_hashing
+cpu: AMD Ryzen 5 3600 6-Core Processor              
+                                          │    benchs    │
+                                          │    sec/op    │
+NewExtendableHash-12                        79.08m ±  8%
+ExtendableHash_Insert-12                     5.172 ± 14%
+ExtendableHash_GetByKey_ExistingKey-12      17.19n ±  1%
+ExtendableHash_GetByKey_NotExistingKey-12   22.23n ±  3%
+ExtendableHash_GetByKey_Together-12          8.443 ±  3%
+geomean                                     1.057m
+
+                                          │     benchs     │
+                                          │      B/op      │
+NewExtendableHash-12                        80.00Mi ± 0%
+ExtendableHash_Insert-12                    1.053Gi ± 0%
+ExtendableHash_GetByKey_ExistingKey-12        0.000 ± 0%
+ExtendableHash_GetByKey_NotExistingKey-12     0.000 ± 0%
+ExtendableHash_GetByKey_Together-12           0.000 ± 0%
+geomean                                                  ¹
+¹ summaries must be >0 to compute geomean
+
+                                          │    benchs     │
+                                          │   allocs/op   │
+NewExtendableHash-12                        2.097M ± 0%
+ExtendableHash_Insert-12                    14.02M ± 0%
+ExtendableHash_GetByKey_ExistingKey-12       0.000 ± 0%
+ExtendableHash_GetByKey_NotExistingKey-12    0.000 ± 0%
+ExtendableHash_GetByKey_Together-12          0.000 ± 0%
+geomean                                                 ¹
+¹ summaries must be >0 to compute geomean

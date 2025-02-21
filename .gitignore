@@ -1,5 +1,7 @@
 .idea
+.vscode
 
 *.test
 *.prof
 benchs
+*/profilers_pdf

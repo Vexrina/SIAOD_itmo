@@ -101,19 +101,21 @@ func generateValues(n int) []string {
 }
 
 var (
-	keys   = generateKeys(1000)
-	values = generateValues(1000)
+	keys   = generateKeys(10e6) // 10^6 = 1_000_000
+	values = generateValues(10e6)
+	globalDepth = 20
+	bucketSize = 256
 )
 
 func BenchmarkNewExtendableHash(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		NewExtendableHash(7, 128)
+		NewExtendableHash(globalDepth, bucketSize)
 	}
 }
 
 func BenchmarkExtendableHash_Insert(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		eh := NewExtendableHash(7, 128)
+		eh := NewExtendableHash(globalDepth, bucketSize)
 		for jndx := range keys {
 			eh.Insert(keys[jndx], values[jndx])
 		}
@@ -121,7 +123,7 @@ func BenchmarkExtendableHash_Insert(b *testing.B) {
 }
 
 func BenchmarkExtendableHash_GetByKey_ExistingKey(b *testing.B) {
-	eh := NewExtendableHash(7, 128)
+	eh := NewExtendableHash(globalDepth, bucketSize)
 	for jndx := range keys {
 		eh.Insert(keys[jndx], values[jndx])
 	}
@@ -133,13 +135,25 @@ func BenchmarkExtendableHash_GetByKey_ExistingKey(b *testing.B) {
 }
 
 func BenchmarkExtendableHash_GetByKey_NotExistingKey(b *testing.B) {
-	eh := NewExtendableHash(7, 128)
+	eh := NewExtendableHash(globalDepth, bucketSize)
 	for jndx := range keys {
 		eh.Insert(keys[jndx], values[jndx])
 	}
-	key := "abcd"
+	key := "key-777"
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		eh.GetByKey(key)
+	}
+}
+
+func BenchmarkExtendableHash_GetByKey_Together(b *testing.B) {
+	eh := NewExtendableHash(globalDepth, bucketSize)
+	for jndx := range keys {
+		eh.Insert(keys[jndx], values[jndx])
+	}
+	b.ResetTimer()
+	for _, key := range keys {
+		eh.GetByKey(key)
+		eh.GetByKey("-" + key)
 	}
 }
