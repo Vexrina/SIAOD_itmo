@@ -10,12 +10,12 @@ func TestInsert(t *testing.T) {
 	keys := []int{10, 20, 5, 6, 12, 30, 7, 17}
 
 	for _, key := range keys {
-		btree.Insert(key)
+		btree.Insert(key, "")
 	}
 
 	// Проверяем, что все ключи присутствуют в дереве
 	for _, key := range keys {
-		if !btree.Search(key) {
+		if _, ok := btree.Search(key); !ok {
 			t.Errorf("Key %d not found after insertion", key)
 		}
 	}
@@ -26,14 +26,14 @@ func TestDelete(t *testing.T) {
 	keys := []int{10, 20, 5, 6, 12, 30, 7, 17}
 
 	for _, key := range keys {
-		btree.Insert(key)
+		btree.Insert(key, "")
 	}
 
 	// Удаляем ключи и проверяем их отсутствие
 	deleteKeys := []int{6, 12, 30}
 	for _, key := range deleteKeys {
 		btree.Delete(key)
-		if btree.Search(key) {
+		if _, ok := btree.Search(key); ok {
 			t.Errorf("Key %d found after deletion", key)
 		}
 	}
@@ -41,7 +41,7 @@ func TestDelete(t *testing.T) {
 	// Проверяем, что оставшиеся ключи присутствуют
 	remainingKeys := []int{10, 20, 5, 7, 17}
 	for _, key := range remainingKeys {
-		if !btree.Search(key) {
+		if _, ok := btree.Search(key); !ok {
 			t.Errorf("Key %d not found after deletion", key)
 		}
 	}
@@ -52,12 +52,12 @@ func TestSearch(t *testing.T) {
 	keys := []int{10, 20, 5, 6, 12, 30, 7, 17}
 
 	for _, key := range keys {
-		btree.Insert(key)
+		btree.Insert(key, "")
 	}
 
 	// Проверяем наличие всех ключей
 	for _, key := range keys {
-		if !btree.Search(key) {
+		if _, ok := btree.Search(key); !ok {
 			t.Errorf("Key %d not found", key)
 		}
 	}
@@ -65,7 +65,7 @@ func TestSearch(t *testing.T) {
 	// Проверяем отсутствие ключей, которые не были добавлены
 	nonExistentKeys := []int{1, 2, 3, 100}
 	for _, key := range nonExistentKeys {
-		if btree.Search(key) {
+		if _, ok := btree.Search(key); ok {
 			t.Errorf("Non-existent key %d found", key)
 		}
 	}
@@ -77,7 +77,7 @@ func TestPrint(t *testing.T) {
 	keys := []int{10, 20, 5, 6, 12, 30, 7, 17}
 
 	for _, key := range keys {
-		btree.Insert(key)
+		btree.Insert(key, "")
 	}
 
 	// Проверяем, что вывод не вызывает паники
@@ -96,7 +96,7 @@ func BenchmarkInsert(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		for _, key := range keys {
-			btree.Insert(key)
+			btree.Insert(key, "")
 		}
 	}
 }
@@ -107,7 +107,7 @@ func BenchmarkSearch(b *testing.B) {
 	keys := []int{10, 20, 5, 6, 12, 30, 7, 17}
 
 	for _, key := range keys {
-		btree.Insert(key)
+		btree.Insert(key, "")
 	}
 
 	b.ResetTimer()
@@ -124,7 +124,7 @@ func BenchmarkDelete(b *testing.B) {
 	keys := []int{10, 20, 5, 6, 12, 30, 7, 17}
 
 	for _, key := range keys {
-		btree.Insert(key)
+		btree.Insert(key, "")
 	}
 
 	b.ResetTimer()

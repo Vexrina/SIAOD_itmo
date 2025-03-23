@@ -7,23 +7,24 @@ import (
 
 func main() {
 	head := btree.NewBTree()
-	keys := []int{10, 20, 5, 6, 12, 30, 7, 17}
+	head.Insert(10, "Data for key 10")
+	head.Insert(20, "Data for key 20")
+	head.Insert(5, "Data for key 5")
 
-	for _, key := range keys {
-		head.Insert(key)
+	value, found := head.Search(10)
+	if found {
+		fmt.Println("Found:", value)
+	} else {
+		fmt.Println("Not found")
 	}
 
-	fmt.Println("B-Tree after insertion:")
 	head.PrettyPrint()
 
-	fmt.Println("Search for 6:", head.Search(6))   // true
-	fmt.Println("Search for 15:", head.Search(15)) // false
-
-	head.Delete(6)
-	fmt.Println("B-Tree after deleting 6:")
-	head.PrettyPrint()
-
-	head.Delete(12)
-	fmt.Println("B-Tree after deleting 12:")
-	head.PrettyPrint()
+	head = btree.NewBTree()
+	err := btree.LoadDataset("lab_02/btree/dataset_amazon.csv", head)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(head.Search(5))
 }

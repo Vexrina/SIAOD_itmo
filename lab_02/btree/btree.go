@@ -1,7 +1,9 @@
 package btree
 
 import (
+	"encoding/csv"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -22,7 +24,7 @@ func NewBTree() *Tree {
 // load factor, depth, ноды удовлетворяют условиям B дерева
 // на том же датасете посмотреть в профайлере боттлнеки
 
-func (t *Tree) Insert(key int) {
+func (t *Tree) Insert(key int, value string) {
 	root := t.root
 	if len(root.keys) == 2*degree-1 {
 		newRoot := NewBTreeNode(false)
@@ -30,18 +32,21 @@ func (t *Tree) Insert(key int) {
 		t.splitChild(newRoot, 0)
 		t.root = newRoot
 	}
-	t.insertNonFull(t.root, key)
+	t.insertNonFull(t.root, key, value)
 }
 
-func (t *Tree) insertNonFull(node *Node, key int) {
+func (t *Tree) insertNonFull(node *Node, key int, value string) {
 	i := len(node.keys) - 1
 	if node.leaf {
 		node.keys = append(node.keys, 0)
+		node.data = append(node.data, "") // Добавляем место для данных
 		for i >= 0 && key < node.keys[i] {
 			node.keys[i+1] = node.keys[i]
+			node.data[i+1] = node.data[i] // Перемещаем данные вместе с ключами
 			i--
 		}
 		node.keys[i+1] = key
+		node.data[i+1] = value // Вставляем данные
 	} else {
 		for i >= 0 && key < node.keys[i] {
 			i--
@@ -53,7 +58,7 @@ func (t *Tree) insertNonFull(node *Node, key int) {
 				i++
 			}
 		}
-		t.insertNonFull(node.children[i], key)
+		t.insertNonFull(node.children[i], key, value)
 	}
 }
 
@@ -62,15 +67,20 @@ func (t *Tree) splitChild(parent *Node, index int) {
 	newChild := NewBTreeNode(child.leaf)
 
 	parent.keys = append(parent.keys, 0)
+	parent.data = append(parent.data, "") // Добавляем место для данных
 	copy(parent.keys[index+1:], parent.keys[index:])
+	copy(parent.data[index+1:], parent.data[index:]) // Копируем данные
 	parent.keys[index] = child.keys[degree-1]
+	parent.data[index] = child.data[degree-1] // Копируем данные
 
 	parent.children = append(parent.children, nil)
 	copy(parent.children[index+2:], parent.children[index+1:])
 	parent.children[index+1] = newChild
 
 	newChild.keys = append(newChild.keys, child.keys[degree:]...)
+	newChild.data = append(newChild.data, child.data[degree:]...) // Копируем данные
 	child.keys = child.keys[:degree-1]
+	child.data = child.data[:degree-1] // Обрезаем данные
 
 	if !child.leaf {
 		newChild.children = append(newChild.children, child.children[degree:]...)
@@ -78,20 +88,20 @@ func (t *Tree) splitChild(parent *Node, index int) {
 	}
 }
 
-func (t *Tree) Search(key int) bool {
+func (t *Tree) Search(key int) (string, bool) {
 	return t.search(t.root, key)
 }
 
-func (t *Tree) search(node *Node, key int) bool {
+func (t *Tree) search(node *Node, key int) (string, bool) {
 	i := 0
 	for i < len(node.keys) && key > node.keys[i] {
 		i++
 	}
 	if i < len(node.keys) && key == node.keys[i] {
-		return true
+		return node.data[i], true // Возвращаем данные
 	}
 	if node.leaf {
-		return false
+		return "", false
 	}
 	return t.search(node.children[i], key)
 }
@@ -255,4 +265,26 @@ func (t *Tree) prettyPrintTree(node *Node, level int) {
 	for _, child := range node.children {
 		t.prettyPrintTree(child, level+1)
 	}
+}
+
+func LoadDataset(filename string, btree *Tree) error {
+	file, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		return err
+	}
+
+	for idx, record := range records {
+		key := idx // там в датасете UUIDы в первой, не хочу парится
+		value := record[1]
+		btree.Insert(key, value)
+	}
+
+	return nil
 }

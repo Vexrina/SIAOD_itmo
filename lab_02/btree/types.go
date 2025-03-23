@@ -44,6 +44,7 @@ type (
 		leaf     bool
 		keys     []int
 		children []*Node
+		data     []string
 	}
 
 	Tree struct {
