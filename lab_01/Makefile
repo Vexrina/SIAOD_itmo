@@ -1,4 +1,4 @@
-style:
+bestyle:
 	go fmt ./...
 
 ph_bench:
@@ -23,7 +23,7 @@ ph_memory_profiler:
 	done
 
 eh_bench:
-	go test -benchmem -count=7 -bench . ./extendible_hashing > ./extendible_hashing/benchs
+	go test -benchmem -count=10 -bench . ./extendible_hashing > ./extendible_hashing/benchs
 	benchstat ./extendible_hashing/benchs > ./extendible_hashing/benchstat_res
 
 eh_cover:
