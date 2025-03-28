@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 )
 
@@ -19,10 +20,8 @@ func NewBTree() *Tree {
 	return &Tree{root: NewBTreeNode(true)}
 }
 
-// todo
-// dataset (любой с кегля) > btree
-// load factor, depth, ноды удовлетворяют условиям B дерева
-// на том же датасете посмотреть в профайлере боттлнеки
+// переписать на правильную вставку
+// почему максимум не такой как ожидалось
 
 func (t *Tree) Insert(key int, value string) {
 	root := t.root
@@ -264,6 +263,46 @@ func (t *Tree) prettyPrintTree(node *Node, level int) {
 	fmt.Print(sb.String())
 	for _, child := range node.children {
 		t.prettyPrintTree(child, level+1)
+	}
+}
+
+func CountDepth(root *Tree) int {
+	return countDepth(root.root, 0)
+}
+
+func countDepth(node *Node, depth int) int {
+	if node == nil {
+		return depth
+	}
+	maxDepth := depth
+	for _, child := range node.children {
+		tempDepth := countDepth(child, depth+1)
+		if maxDepth < tempDepth {
+			maxDepth = tempDepth
+		}
+	}
+	return maxDepth
+}
+
+func CountLoadFactorOfNode(root *Tree) (int, float64) {
+	allLF := []int{}
+	loadFactor(root.root, &allLF)
+	slices.Sort(allLF)
+	size := len(allLF)
+	sum := 0
+	for _, v := range allLF {
+		sum += v
+	}
+	return allLF[size-1], float64(sum) / float64(size)
+}
+
+func loadFactor(node *Node, allLF *[]int) {
+	if node == nil {
+		return
+	}
+	*allLF = append(*allLF, len(node.keys))
+	for _, child := range node.children {
+		loadFactor(child, allLF)
 	}
 }
 

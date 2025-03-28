@@ -1,7 +1,7 @@
 package btree
 
 const (
-	degree = 2 // Минимальная степень B-дерева
+	degree = 6 // Минимальная степень B-дерева
 )
 
 type (
@@ -38,6 +38,8 @@ type (
 		PrettyPrint()
 		// Вспомогательный метод для рекурсивного вывода структуры B-дерева с отступами.
 		prettyPrintTree(node *Node, level int)
+		// подсчет глубины
+		countDepth(node *Node, depth int) int
 	}
 
 	Node struct {
