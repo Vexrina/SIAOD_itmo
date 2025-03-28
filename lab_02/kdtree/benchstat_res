@@ -1,0 +1,29 @@
+goos: linux
+goarch: amd64
+pkg: vexrina/siaod_itmo/lab_02/kdtree
+cpu: AMD Ryzen 5 3600 6-Core Processor              
+                 │ ./kdtree/benchs │
+                 │     sec/op      │
+InsertDataset-12    0.08691n ± 37%
+NN-12               0.04857n ± 49%
+KNN_KD-12           0.05275n ±  5%
+KNN_Linear-12       0.05446n ±  2%
+geomean             0.05901n
+
+                 │ ./kdtree/benchs │
+                 │      B/op       │
+InsertDataset-12      0.000 ± 0%
+NN-12                 0.000 ± 0%
+KNN_KD-12             0.000 ± 0%
+KNN_Linear-12         0.000 ± 0%
+geomean                          ¹
+¹ summaries must be >0 to compute geomean
+
+                 │ ./kdtree/benchs │
+                 │    allocs/op    │
+InsertDataset-12      0.000 ± 0%
+NN-12                 0.000 ± 0%
+KNN_KD-12             0.000 ± 0%
+KNN_Linear-12         0.000 ± 0%
+geomean                          ¹
+¹ summaries must be >0 to compute geomean

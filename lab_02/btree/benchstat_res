@@ -1,0 +1,26 @@
+goos: linux
+goarch: amd64
+pkg: vexrina/siaod_itmo/lab_02/btree
+cpu: AMD Ryzen 5 3600 6-Core Processor              
+                 │   ./btree/benchs   │
+                 │       sec/op       │
+InsertDataset-12       0.02587n ±  1%
+DeleteDataset-12   0.000006900n ±  3%
+SearchDataset-12   0.000001000n ± 10%
+geomean             0.00005631n
+
+                 │ ./btree/benchs │
+                 │      B/op      │
+InsertDataset-12     0.000 ± 0%
+DeleteDataset-12     0.000 ± 0%
+SearchDataset-12     0.000 ± 0%
+geomean                         ¹
+¹ summaries must be >0 to compute geomean
+
+                 │ ./btree/benchs │
+                 │   allocs/op    │
+InsertDataset-12     0.000 ± 0%
+DeleteDataset-12     0.000 ± 0%
+SearchDataset-12     0.000 ± 0%
+geomean                         ¹
+¹ summaries must be >0 to compute geomean

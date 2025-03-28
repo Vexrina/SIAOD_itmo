@@ -1,0 +1,28 @@
+Benchmark_IndexingThroughput-8
+                230274	      5175 ns/op	    193847 docs/sec	         4.608 mean_microsec/doc	         4.000 median_microsec/doc	         5.159 microsec/op	         3.000 q25_microsec/doc	         5.000 q75_microsec/doc	         7.000 q9_microsec/doc	         6.699 std_microsec/doc	   14302 B/op	      92 allocs/op
+
+BenchmarkSearchLatency
+                b.N                                    meanLatenccy                 median                      q25                         q75                         q90                         std
+/match-8   	  201064	      5645 ns/op	         5.077 microsec/doc	         4.000 microsec/doc	         4.000 microsec/doc	         5.000 microsec/doc	         7.000 microsec/doc	         5.950 std_microsec/doc	    5859 B/op	      68 allocs/op
+/term-8    	  184935	      6553 ns/op	         5.976 microsec/doc	         5.000 microsec/doc	         4.000 microsec/doc	         6.000 microsec/doc	         8.000 microsec/doc	         8.685 std_microsec/doc	    4958 B/op	      59 allocs/op
+/phrase-8  	  107563	     11699 ns/op	         11.14 microsec/doc	         9.000 microsec/doc	         8.000 microsec/doc	         11.00 microsec/doc	         14.00 microsec/doc	         41.95 std_microsec/doc	    9602 B/op	     105 allocs/op
+
+SaveCSVIndex
+                  b.N                                meanIndex                   MedianIndex                 q25_index                q50_index                      q75_index                    std
+/example-8 	      12	   127_794_625 ns/op	     127_794 microsec/file	     129_472 microsec/file	     126_356 microsec/file	     137_522 microsec/file	    _138_028 microsec/file	     13_152 microsec/file	  _105_466_532 B/op	      1_886_355 allocs/op
+/trc-8     	       1	53_396_632_542 ns/op	  53_396_630 microsec/file	  53_396_630 microsec/file	  53_396_630 microsec/file	  53_396_630 microsec/file	  53_396_630 microsec/file	       _  0 microsec/file	36_753_546_392 B/op	    679_335_974 allocs/op
+/tdvach-8  	       1	 5_602_111_166 ns/op	   5_602_108 microsec/file	   5_602_108 microsec/file	   5_602_108 microsec/file	   5_602_108 microsec/file	   5_602_108 microsec/file	       _  0 microsec/file	 4_289_795_736 B/op    	 79_579_997 allocs/op
+
+Benchmark_SearchIndex/
+                                    b.N                                     Mean                       Median                        q25                         q75                         q9                          std
+small_file,_1_term-8         	  154821	      8378 ns/op	       7.817 microsec/query	       6.000 microsec/query	       5.000 microsec/query	       8.000 microsec/query	       10.00 microsec/query	       19.89 microsec/query	       7541 B/op	      87 allocs/op
+small_file,_half_of_text-8   	   24151	     46255 ns/op	       45.67 microsec/query	       39.00 microsec/query	       36.00 microsec/query	       44.00 microsec/query	       52.00 microsec/query	       108.2 microsec/query	      21770 B/op	     298 allocs/op
+small_file,_full_text-8      	   16449	     67129 ns/op	       66.53 microsec/query	       58.00 microsec/query	       55.00 microsec/query	       64.00 microsec/query	       75.00 microsec/query	       76.98 microsec/query	      31971 B/op	     446 allocs/op
+medium_file,_1_term-8        	  196023	     12316 ns/op	       11.74 microsec/query	       9.000 microsec/query	       8.000 microsec/query	       11.00 microsec/query	       15.00 microsec/query	       46.08 microsec/query	       7339 B/op	      83 allocs/op
+medium_file,_half_of_text-8  	    6032	    247986 ns/op	       247.3 microsec/query	       186.0 microsec/query	       158.0 microsec/query	       229.0 microsec/query	       298.0 microsec/query	       254.8 microsec/query	      70574 B/op	     987 allocs/op
+medium_file,_full_text-8     	    3922	    296588 ns/op	       296.0 microsec/query	       282.0 microsec/query	       266.0 microsec/query	       305.0 microsec/query	       344.0 microsec/query	       86.56 microsec/query	     104037 B/op	    1486 allocs/op
+large_file,_1_term-8         	  164761	      7778 ns/op	       7.210 microsec/query	       5.000 microsec/query	       5.000 microsec/query	       7.000 microsec/query	       10.00 microsec/query	       19.50 microsec/query	       7370 B/op	      83 allocs/op
+large_file,_half_of_text-8   	   17877	     63226 ns/op	       62.60 microsec/query	       54.00 microsec/query	       45.00 microsec/query	       63.00 microsec/query	       74.00 microsec/query	       156.5 microsec/query	      39018 B/op	     550 allocs/op
+large_file,_full_text-8      	    5923	    200009 ns/op	       199.3 microsec/query	       167.0 microsec/query	       140.0 microsec/query	       183.0 microsec/query	       235.0 microsec/query	       463.4 microsec/query	     106036 B/op	    1487 allocs/op
+PASS
+ok  	vexrina/siaod_itmo/lab_03/internal/utils	762.535s

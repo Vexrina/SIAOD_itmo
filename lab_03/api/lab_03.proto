@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package lab_03;
+
+option go_package = "lab_03/pkg/lab_03;lab_03";
+
+service Lab03 {
+  rpc LoadFile (LoadFileRequest) returns (LoadFileReply) {}
+  rpc GetAllFiles (GetAllFilesRequest) returns (GetAllFilesResponse) {}
+  rpc FindTerm (FindTermRequest) returns (FindTermResponse) {}
+}
+
+message LoadFileRequest {
+  string name = 1;
+  string content = 2;
+}
+
+message LoadFileReply {
+  string message = 1;
+}
+
+message GetAllFilesRequest {}
+
+message GetAllFilesResponse {
+  string indexed = 1;
+  string not_indexed = 2;
+}
+
+message FindTermRequest {
+  string fileName = 1;
+  string term = 2;
+}
+
+message FindTermResponse {
+  string message = 1;
+}

@@ -1,7 +1,7 @@
 package btree
 
 const (
-	degree = 6 // Минимальная степень B-дерева
+	degree = 4 // Минимальная степень B-дерева
 )
 
 type (
@@ -44,7 +44,7 @@ type (
 
 	Node struct {
 		leaf     bool
-		keys     []int
+		keys     []string
 		children []*Node
 		data     []string
 	}

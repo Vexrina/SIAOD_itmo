@@ -125,3 +125,117 @@ func LoadCSV(filename string) ([]Point, error) {
 
 	return points, nil
 }
+
+func (t *KDTree_Impl) NearestNNeighborsKD(target Point, n int) ([]Point, []float64) {
+	if t.Root == nil {
+		return nil, nil
+	}
+
+	// Используем maxHeap для хранения N ближайших соседей
+	neighbors := make([]*neighbor, 0, n)
+	neighbors = nearestNNeighbors(t.Root, target, neighbors, n)
+
+	// Сортируем результаты по расстоянию (от ближнего к дальнему)
+	sort.Slice(neighbors, func(i, j int) bool {
+		return neighbors[i].distance < neighbors[j].distance
+	})
+
+	// Извлекаем точки и расстояния
+	points := make([]Point, len(neighbors))
+	distances := make([]float64, len(neighbors))
+	for i, nb := range neighbors {
+		points[i] = nb.point
+		distances[i] = nb.distance
+	}
+
+	return points, distances
+}
+
+type neighbor struct {
+	point    Point
+	distance float64
+}
+
+// nearestNNeighbors рекурсивно ищет N ближайших соседей
+func nearestNNeighbors(node *KDNode, target Point, neighbors []*neighbor, n int) []*neighbor {
+	if node == nil {
+		return neighbors
+	}
+
+	// Вычисляем расстояние до текущей точки
+	dist := euclideanDistance(target, node.Point)
+
+	// Если у нас еще нет N соседей или текущая точка ближе, чем самый дальний из N соседей
+	if len(neighbors) < n || dist < neighbors[len(neighbors)-1].distance {
+		// Добавляем текущую точку в список соседей
+		newNeighbor := &neighbor{point: node.Point, distance: dist}
+		neighbors = append(neighbors, newNeighbor)
+
+		// Сортируем по расстоянию (самый дальний в конце)
+		sort.Slice(neighbors, func(i, j int) bool {
+			return neighbors[i].distance < neighbors[j].distance
+		})
+
+		// Если превысили N, удаляем самый дальний
+		if len(neighbors) > n {
+			neighbors = neighbors[:n]
+		}
+	}
+
+	// Определяем, в каком поддереве искать
+	var nextNode, otherNode *KDNode
+	if target[node.Axis] < node.Point[node.Axis] {
+		nextNode = node.Left
+		otherNode = node.Right
+	} else {
+		nextNode = node.Right
+		otherNode = node.Left
+	}
+
+	// Рекурсивно ищем в ближайшем поддереве
+	neighbors = nearestNNeighbors(nextNode, target, neighbors, n)
+
+	// Проверяем, нужно ли искать в другом поддереве
+	if len(neighbors) < n || math.Abs(target[node.Axis]-node.Point[node.Axis]) < neighbors[len(neighbors)-1].distance {
+		neighbors = nearestNNeighbors(otherNode, target, neighbors, n)
+	}
+
+	return neighbors
+}
+
+// NearestNNeighborsLinear возвращает N ближайших соседей с использованием линейного поиска
+func NearestNNeighborsLinear(points []Point, target Point, n int) ([]Point, []float64) {
+	if len(points) == 0 || n <= 0 {
+		return nil, nil
+	}
+
+	// Создаем слайс для хранения соседей и расстояний
+	neighbors := make([]*neighbor, 0, len(points))
+
+	// Вычисляем расстояния до всех точек
+	for _, point := range points {
+		dist := euclideanDistance(target, point)
+		neighbors = append(neighbors, &neighbor{point: point, distance: dist})
+	}
+
+	// Сортируем по расстоянию
+	sort.Slice(neighbors, func(i, j int) bool {
+		return neighbors[i].distance < neighbors[j].distance
+	})
+
+	// Берем первые N элементов
+	if n > len(neighbors) {
+		n = len(neighbors)
+	}
+	neighbors = neighbors[:n]
+
+	// Извлекаем точки и расстояния
+	resultPoints := make([]Point, n)
+	resultDistances := make([]float64, n)
+	for i, nb := range neighbors {
+		resultPoints[i] = nb.point
+		resultDistances[i] = nb.distance
+	}
+
+	return resultPoints, resultDistances
+}

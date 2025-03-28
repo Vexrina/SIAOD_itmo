@@ -11,7 +11,7 @@ import (
 func NewBTreeNode(leaf bool) *Node {
 	return &Node{
 		leaf:     leaf,
-		keys:     make([]int, 0, 2*degree-1),
+		keys:     make([]string, 0, 2*degree-1),
 		children: make([]*Node, 0, 2*degree),
 	}
 }
@@ -23,7 +23,7 @@ func NewBTree() *Tree {
 // переписать на правильную вставку
 // почему максимум не такой как ожидалось
 
-func (t *Tree) Insert(key int, value string) {
+func (t *Tree) Insert(key, value string) {
 	root := t.root
 	if len(root.keys) == 2*degree-1 {
 		newRoot := NewBTreeNode(false)
@@ -34,10 +34,10 @@ func (t *Tree) Insert(key int, value string) {
 	t.insertNonFull(t.root, key, value)
 }
 
-func (t *Tree) insertNonFull(node *Node, key int, value string) {
+func (t *Tree) insertNonFull(node *Node, key, value string) {
 	i := len(node.keys) - 1
 	if node.leaf {
-		node.keys = append(node.keys, 0)
+		node.keys = append(node.keys, "")
 		node.data = append(node.data, "") // Добавляем место для данных
 		for i >= 0 && key < node.keys[i] {
 			node.keys[i+1] = node.keys[i]
@@ -65,7 +65,7 @@ func (t *Tree) splitChild(parent *Node, index int) {
 	child := parent.children[index]
 	newChild := NewBTreeNode(child.leaf)
 
-	parent.keys = append(parent.keys, 0)
+	parent.keys = append(parent.keys, "")
 	parent.data = append(parent.data, "") // Добавляем место для данных
 	copy(parent.keys[index+1:], parent.keys[index:])
 	copy(parent.data[index+1:], parent.data[index:]) // Копируем данные
@@ -87,11 +87,11 @@ func (t *Tree) splitChild(parent *Node, index int) {
 	}
 }
 
-func (t *Tree) Search(key int) (string, bool) {
+func (t *Tree) Search(key string) (string, bool) {
 	return t.search(t.root, key)
 }
 
-func (t *Tree) search(node *Node, key int) (string, bool) {
+func (t *Tree) search(node *Node, key string) (string, bool) {
 	i := 0
 	for i < len(node.keys) && key > node.keys[i] {
 		i++
@@ -105,14 +105,14 @@ func (t *Tree) search(node *Node, key int) (string, bool) {
 	return t.search(node.children[i], key)
 }
 
-func (t *Tree) Delete(key int) {
+func (t *Tree) Delete(key string) {
 	t.delete(t.root, key)
 	if len(t.root.keys) == 0 && !t.root.leaf {
 		t.root = t.root.children[0]
 	}
 }
 
-func (t *Tree) delete(node *Node, key int) {
+func (t *Tree) delete(node *Node, key string) {
 	i := 0
 	for i < len(node.keys) && key > node.keys[i] {
 		i++
@@ -161,7 +161,7 @@ func (t *Tree) deleteFromInternalNode(node *Node, index int) {
 	}
 }
 
-func (t *Tree) getPred(node *Node, index int) int {
+func (t *Tree) getPred(node *Node, index int) string {
 	curr := node.children[index]
 	for !curr.leaf {
 		curr = curr.children[len(curr.keys)]
@@ -169,7 +169,7 @@ func (t *Tree) getPred(node *Node, index int) int {
 	return curr.keys[len(curr.keys)-1]
 }
 
-func (t *Tree) getSucc(node *Node, index int) int {
+func (t *Tree) getSucc(node *Node, index int) string {
 	curr := node.children[index+1]
 	for !curr.leaf {
 		curr = curr.children[0]
@@ -195,7 +195,7 @@ func (t *Tree) borrowFromPrev(node *Node, index int) {
 	child := node.children[index]
 	sibling := node.children[index-1]
 
-	child.keys = append([]int{node.keys[index-1]}, child.keys...)
+	child.keys = append([]string{node.keys[index-1]}, child.keys...)
 	node.keys[index-1] = sibling.keys[len(sibling.keys)-1]
 
 	if !child.leaf {
@@ -284,7 +284,7 @@ func countDepth(node *Node, depth int) int {
 	return maxDepth
 }
 
-func CountLoadFactorOfNode(root *Tree) (int, float64) {
+func CountLoadFactorOfNode(root *Tree) (int, float64, int) {
 	allLF := []int{}
 	loadFactor(root.root, &allLF)
 	slices.Sort(allLF)
@@ -293,7 +293,7 @@ func CountLoadFactorOfNode(root *Tree) (int, float64) {
 	for _, v := range allLF {
 		sum += v
 	}
-	return allLF[size-1], float64(sum) / float64(size)
+	return allLF[size-1], float64(sum) / float64(size), allLF[0]
 }
 
 func loadFactor(node *Node, allLF *[]int) {
@@ -306,24 +306,25 @@ func loadFactor(node *Node, allLF *[]int) {
 	}
 }
 
-func LoadDataset(filename string, btree *Tree) error {
+func LoadDataset(filename string, btree *Tree) ([]string, error) {
 	file, err := os.Open(filename)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer file.Close()
 
 	reader := csv.NewReader(file)
 	records, err := reader.ReadAll()
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	for idx, record := range records {
-		key := idx // там в датасете UUIDы в первой, не хочу парится
+	var keys []string
+	for _, record := range records {
+		key := record[0] // там в датасете UUIDы в первой, не хочу парится
+		keys = append(keys, key)
 		value := record[1]
 		btree.Insert(key, value)
 	}
 
-	return nil
+	return keys, nil
 }

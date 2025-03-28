@@ -57,33 +57,33 @@ var (
 func BenchmarkInsertDataset(b *testing.B) {
 	head := NewBTree()
 	b.ResetTimer()
-	err := LoadDataset(datasetInsideBench, head)
+	_, err := LoadDataset(datasetInsideBench, head)
 	if err != nil {
 		b.Fatal(err)
 	}
 }
 
 func BenchmarkDeleteDataset(b *testing.B) {
-	keys := []int{1, 2, 3, 4, 150, 5416, 616, 191}
+	keysIdx := []int{1, 2, 3, 4, 150, 5416, 616, 191}
 	head := NewBTree()
-	err := LoadDataset(datasetInsideBench, head)
+	keys, err := LoadDataset(datasetInsideBench, head)
 	if err != nil {
 		b.Fatal(err)
 	}
 	b.ResetTimer()
-	for _, key := range keys {
-		head.Delete(key)
+	for _, key := range keysIdx {
+		head.Delete(keys[key])
 	}
 }
 
 func BenchmarkSearchDataset(b *testing.B) {
 	head := NewBTree()
-	err := LoadDataset(datasetInsideBench, head)
+	keys, err := LoadDataset(datasetInsideBench, head)
 	if err != nil {
 		b.Fatal(err)
 	}
 	key := rand.Intn(10000) + 1
 	b.ResetTimer()
 
-	head.Search(key)
+	head.Search(keys[key])
 }
